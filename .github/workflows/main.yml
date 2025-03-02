@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -24,13 +24,12 @@ jobs:
           sudo apt-get install -y python3-pip openjdk-17-jdk zip unzip
           pip install buildozer
 
-      - name: Accept SDK licenses
-        run: echo yes | sudo sdkmanager --licenses
+      # TADY JSME ODSTRANILI KROK Accept SDK licenses
 
       - name: Build with Buildozer
         run: |
           buildozer android debug
-          
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
