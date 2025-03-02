@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -21,17 +21,13 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          # Vytvoření defaultního buildozer.spec, pokud ho ještě nemáš
           if [ ! -f buildozer.spec ]; then
             buildozer init
           fi
-          # Uprav buildozer.spec tak, aby v sekci requirements byly
-          #   python3,kivy,kivymd,pyjnius
-          #   a source.dir = .
           buildozer android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: battery_app_apk
           path: bin/*.apk
