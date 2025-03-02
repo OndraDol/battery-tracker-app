@@ -16,14 +16,18 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
+          # Nainstalujeme pár základních balíků
           sudo apt-get install -y python3 python3-pip openjdk-17-jdk unzip zip
-          pip3 install buildozer
+          # Tady instalujeme buildozer, cython, a třeba kivy/kivymd
+          pip3 install buildozer cython kivy kivymd pyjnius
 
       - name: Build with Buildozer
         run: |
+          # Pokud není buildozer.spec, vytvoří se defaultní
           if [ ! -f buildozer.spec ]; then
             buildozer init
           fi
+          # Samotný build APK v debug módu
           buildozer android debug
 
       - name: Upload APK
