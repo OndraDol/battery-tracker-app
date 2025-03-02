@@ -10,39 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Stáhneme kód z repozitáře
       - name: Check out code
         uses: actions/checkout@v4
 
-      # 2) Pro jistotu vypíšeme, co je v adresáři
       - name: Show files
         run: ls -la
 
-      # 3) Nastavíme Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      # 4) Nainstalujeme Buildozer a knihovny, včetně starší verze python-for-android
       - name: Install packages
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip wget unzip zip openjdk-17-jdk
-          # Zde pinujeme konkrétní verzi p4a (např. 2023.07.08)
-          pip install buildozer cython kivy kivymd pyjnius "python-for-android==2023.07.08"
+          # Pinujeme python-for-android na 2023.5.21
+          pip install buildozer cython kivy kivymd pyjnius "python-for-android==2023.5.21"
 
-      # 5) Pro jistotu smažeme starou SDK složku, aby se nepoužívaly polovičaté soubory
       - name: Remove old sdk folder
         run: |
           rm -rf .buildozer/android/platform/android-sdk
 
-      # 6) Spustíme build
       - name: Build with Buildozer
         run: |
           buildozer android debug
 
-      # 7) Nahrajeme výsledek (.apk) jako artefakt
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
