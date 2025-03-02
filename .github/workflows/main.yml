@@ -25,11 +25,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip wget unzip zip openjdk-17-jdk
-          # Pinujeme python-for-android na 2023.5.21
-          pip install buildozer cython kivy kivymd pyjnius "python-for-android==2023.5.21"
+          # Zkusíme starší verzi p4a z prosince 2022
+          pip install buildozer cython kivy kivymd pyjnius "python-for-android==2022.12.20"
 
       - name: Remove old sdk folder
         run: |
+          # Pro jistotu smažeme starou instalaci SDK
           rm -rf .buildozer/android/platform/android-sdk
 
       - name: Build with Buildozer
