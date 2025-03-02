@@ -13,6 +13,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
+      - name: Show files
+        run: ls -la
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -22,11 +25,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip openjdk-17-jdk zip unzip
-          # Tady nainstalujeme Buildozer i Cython
-          pip install buildozer cython
-          # Pokud používáš KivyMD, pyjnius, atd., můžeš přidat i:
-          # pip install kivy kivymd pyjnius
-
+          pip install buildozer cython kivy kivymd pyjnius
+          
       - name: Build with Buildozer
         run: |
           buildozer android debug
