@@ -2,36 +2,43 @@ name: Build APK
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          # Nainstalujeme pár základních balíků
-          sudo apt-get install -y python3 python3-pip openjdk-17-jdk unzip zip
-          # Tady instalujeme buildozer, cython, a třeba kivy/kivymd
-          pip3 install buildozer cython kivy kivymd pyjnius
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip install buildozer
+          sudo apt install -y openjdk-11-jdk
+          sudo apt install -y libffi-dev
+          sudo apt install -y python3-dev
+          sudo apt install -y zip
+          sudo apt install -y unzip
+          sudo apt install -y git
+
+      - name: Accept SDK licenses
+        run: echo yes | sudo sdkmanager --licenses
 
       - name: Build with Buildozer
         run: |
-          # Pokud není buildozer.spec, vytvoří se defaultní
-          if [ ! -f buildozer.spec ]; then
-            buildozer init
-          fi
-          # Samotný build APK v debug módu
           buildozer android debug
-
+          
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
-          name: battery_app_apk
+          name: apk
           path: bin/*.apk
