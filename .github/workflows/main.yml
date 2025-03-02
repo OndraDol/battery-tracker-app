@@ -1,0 +1,37 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip openjdk-17-jdk unzip zip
+          pip3 install buildozer
+
+      - name: Build with Buildozer
+        run: |
+          # Vytvoření defaultního buildozer.spec, pokud ho ještě nemáš
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
+          # Uprav buildozer.spec tak, aby v sekci requirements byly
+          #   python3,kivy,kivymd,pyjnius
+          #   a source.dir = .
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: battery_app_apk
+          path: bin/*.apk
