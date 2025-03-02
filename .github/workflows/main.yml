@@ -25,38 +25,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip wget unzip zip openjdk-17-jdk
-          pip install buildozer cython kivy kivymd pyjnius 
-          # (p4a se nainstaluje automaticky s buildozerem, 
-          #  nebo můžeš pinovat starší verzi, to už je na tobě)
+          # Zkusíme základní instalaci Buildozeru a knihoven
+          pip install buildozer cython kivy kivymd pyjnius
+          # (případně python-for-android v konkrétní verzi,
+          #  ale zatím to nechme takto)
 
-      # 1) Nainstalujeme commandline tools
-      - name: Install cmdline-tools
-        run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip tools.zip
-          mv cmdline-tools tools
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/36.0.0-rc5" >> $GITHUB_ENV
-          echo "SDKMANAGER=$HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager" >> $GITHUB_ENV
-
-      # 2) Odsouhlasíme licence a nainstalujeme 36-rc5
-      - name: Pre-install 36-rc5
-        run: |
-          source $GITHUB_ENV
-          yes | $SDKMANAGER --licenses
-          yes | $SDKMANAGER "platforms;android-33" "platform-tools" "build-tools;36.0.0-rc5"
-
-      # 3) Pro jistotu smažeme starou sdk složku, aby se nestahovaly polovičaté soubory
+      # Pro jistotu smažeme starou složku s polovičním SDK
       - name: Remove old sdk folder
         run: |
           rm -rf .buildozer/android/platform/android-sdk
 
       - name: Build with Buildozer
         run: |
-          source $GITHUB_ENV
+          # Nastavíme environment proměnné, které p4a někdy respektuje
+          export P4A_BUILD_TOOLS_REVISION=33.0.0
+          export P4A_BUILD_API=33
+
+          # Spustíme build
           buildozer android debug
 
       - name: Upload APK
