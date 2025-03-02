@@ -1,0 +1,72 @@
+#:import dp kivy.metrics.dp
+
+<BatteryBox>:
+    orientation: "vertical"
+    
+    MDToolbar:
+        title: "Battery Charge Tracker"
+        elevation: 10
+        md_bg_color: app.theme_cls.primary_color
+        specific_text_color: 1, 1, 1, 1
+
+    ScrollView:
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(20)
+            size_hint_y: None
+            height: self.minimum_height
+
+            MDCard:
+                orientation: "vertical"
+                padding: dp(20)
+                elevation: 8
+                radius: [15,]
+                md_bg_color: 0.12, 0.12, 0.12, 1
+
+                MDLabel:
+                    id: today_label
+                    text: "Charged Today: 0%"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    font_style: "H5"
+                MDProgressBar:
+                    id: today_progress
+                    value: 0
+                    max: 100
+                    color: 0, 1, 0, 1
+
+                MDLabel:
+                    id: week_label
+                    text: "Last 7 Days: 0%"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: month_label
+                    text: "Last 30 Days: 0%"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: year_label
+                    text: "Last Year: 0%"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: lifetime_label
+                    text: "Lifetime: 0%"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    font_style: "Subtitle1"
+
+            MDFillRoundFlatButton:
+                text: "Update Stats"
+                pos_hint: {"center_x": 0.5}
+                on_release: root.update_stats()
