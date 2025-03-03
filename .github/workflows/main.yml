@@ -1,51 +1,43 @@
 name: Build APK
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  build-android:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Show files
-        run: ls -la
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install packages
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip wget unzip zip openjdk-17-jdk
-          # Zkusíme základní instalaci Buildozeru a knihoven
-          pip install buildozer cython kivy kivymd pyjnius
-          # (případně python-for-android v konkrétní verzi,
-          #  ale zatím to nechme takto)
+          sudo apt-get install -y openjdk-17-jdk zlib1g-dev
 
-      # Pro jistotu smažeme starou složku s polovičním SDK
-      - name: Remove old sdk folder
+      - name: Set up Android SDK
         run: |
-          rm -rf .buildozer/android/platform/android-sdk
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-*.zip -d cmdline-tools
+          mv cmdline-tools/cmdline-tools ~/android-sdk/cmdline-tools
+          echo "ANDROID_HOME=$(realpath ~/android-sdk)" >> $GITHUB_ENV
+          echo "$(realpath ~/android-sdk/cmdline-tools)/bin" >> $GITHUB_PATH
 
-      - name: Build with Buildozer
+      - name: Install Android components
         run: |
-          # Nastavíme environment proměnné, které p4a někdy respektuje
-          export P4A_BUILD_TOOLS_REVISION=33.0.0
-          export P4A_BUILD_API=33
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-33" "build-tools;33.0.0" "platform-tools"
 
-          # Spustíme build
+      - name: Install Python dependencies
+        run: |
+          pip install "python-for-android==2024.01.21" buildozer kivy kivymd
+
+      - name: Build APK
+        run: |
+          buildozer android clean
           buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: bin/*.apk
