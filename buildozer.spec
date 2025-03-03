@@ -21,6 +21,15 @@ version = 0.1
 # Seznam Python balíčků
 requirements = python3,kivy,kivymd,pyjnius,cython
 
+
+[buildozer]
+# Vynucení konkrétní větve p4a
+p4a.branch = develop
+
+# Explicitní cesta k p4a
+p4a.source_dir = ./python-for-android
+
+
 # Orientace (portrait/landscape)
 orientation = portrait
 
