@@ -1,36 +1,73 @@
 name: Build APK
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      # 1) Stáhneme kód
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # 2) Ukážeme, co je v adresáři
+      - name: Show files
+        run: ls -la
+
+      # 3) Nastavíme Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install system dependencies
+      # 4) Nainstalujeme Buildozer a knihovny
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk git zlib1g-dev
+          sudo apt-get install -y python3-pip wget unzip zip openjdk-17-jdk
+          pip install buildozer cython kivy kivymd pyjnius
+          # p4a se nainstaluje s buildozerem, 
+          # pokud chceš pinovat starší p4a, tak:
+          # pip install "python-for-android==2022.12.20"
 
-      - name: Clone python-for-android
+      # 5) Stáhneme a nainstalujeme commandline tools
+      - name: Install cmdline-tools
         run: |
-          git clone https://github.com/kivy/python-for-android.git
-          cd python-for-android
-          pip install -e .
-          
-      - name: Set Android environment
-        run: |
-          echo "ANDROID_SDK_ROOT=~/.android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=~/.android-ndk" >> $GITHUB_ENV
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip
+          mv cmdline-tools tools
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/36.0.0-rc5" >> $GITHUB_ENV
+          echo "SDKMANAGER=$HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager" >> $GITHUB_ENV
 
+      # 6) Odsouhlasíme licence a nainstalujeme 36-rc5
+      - name: Pre-install 36-rc5
+        run: |
+          source $GITHUB_ENV
+          yes | $SDKMANAGER --licenses
+          yes | $SDKMANAGER "platforms;android-33" "platform-tools" "build-tools;36.0.0-rc5"
+
+      # 7) Smažeme starou složku sdk, aby tam nebyly poloviční data
+      - name: Remove old sdk folder
+        run: |
+          rm -rf .buildozer/android/platform/android-sdk
+
+      # 8) Spustíme build
       - name: Build with Buildozer
         run: |
-          pip install buildozer
-          buildozer android clean
+          source $GITHUB_ENV
           buildozer android debug
+
+      # 9) Nahrajeme .apk jako artefakt
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: bin/*.apk
